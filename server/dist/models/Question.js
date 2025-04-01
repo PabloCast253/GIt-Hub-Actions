@@ -9,5 +9,4 @@ const QuestionSchema = new Schema({
     ]
 });
 const Question = model('Question', QuestionSchema);
-export { QuestionSchema };
-export default Question;
+export { Question };
