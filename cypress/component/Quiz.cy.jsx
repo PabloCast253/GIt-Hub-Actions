@@ -1,60 +1,48 @@
-/// <reference types="cypress" />
+import Quiz from "../../client/src/components/Quiz"
 
-import Quiz from '../../client/src/components/Quiz'; // Adjust path if needed
-import { mount } from '@cypress/react18'; // 👈 Use this if you're using React 18
-
-// Mock questions to simulate API response
-const mockQuestions = [
-  {
-    _id: "q1",
-    question: "What is React?",
-    answers: [
-      { text: "A library for building UI", isCorrect: true },
-      { text: "A backend framework", isCorrect: false },
-      { text: "A database", isCorrect: false },
-    ],
-  },
-  {
-    _id: "q2",
-    question: "What is JSX?",
-    answers: [
-      { text: "JavaScript XML", isCorrect: true },
-      { text: "A server", isCorrect: false },
-      { text: "A CSS extension", isCorrect: false },
-    ],
-  },
-];
-
-describe('<Quiz /> Component', () => {
+describe('Quiz Component', () => {
   beforeEach(() => {
-    mount(<Quiz getQuestionsOverride={() => Promise.resolve(mockQuestions)} />);
-  });
-
-  it('renders the start screen', () => {
-    cy.contains('Start Quiz').should('be.visible');
-  });
-
-  it('starts quiz and shows first question', () => {
-    cy.contains('Start Quiz').click();
-    cy.get('h2').should('contain.text', mockQuestions[0].question);
-  });
-
-  it('selects an answer and moves to next question', () => {
-    cy.contains('Start Quiz').click();
-    cy.get('h2').should('contain.text', mockQuestions[0].question);
-    cy.contains(mockQuestions[0].answers[0].text).should('be.visible').prev('button').click();
-    cy.get('h2').should('contain.text', mockQuestions[1].question);
-  });
-
-  it('completes quiz and shows score', () => {
-    cy.contains('Start Quiz').click();
-
-    mockQuestions.forEach((q) => {
-      cy.get('h2').should('contain.text', q.question);
-      cy.contains(q.answers[0].text).should('be.visible').prev('button').click();
+    cy.intercept({
+        method: 'GET',
+        url: '/api/questions/random'
+      },
+      {
+        fixture: 'questions.json',
+        statusCode: 200
+      }
+      ).as('getRandomQuestion')
     });
 
-    cy.contains('Quiz Completed').should('be.visible');
-    cy.contains('Your score:').should('be.visible');
+  it('should start the quiz and display the first question', () => {
+    cy.mount(<Quiz />);
+    cy.get('button').contains('Start Quiz').click();
+    cy.get('.card').should('be.visible');
+    cy.get('h2').should('not.be.empty');
+  });
+
+  it('should answer questions and complete the quiz', () => {
+    cy.mount(<Quiz />);
+    cy.get('button').contains('Start Quiz').click();
+
+    // Answer questions
+    cy.get('button').contains('1').click();
+
+    // Verify the quiz completion
+    cy.get('.alert-success').should('be.visible').and('contain', 'Your score');
+  });
+
+  it('should restart the quiz after completion', () => {
+    cy.mount(<Quiz />);
+    cy.get('button').contains('Start Quiz').click();
+
+    // Answer questions
+    cy.get('button').contains('1').click();
+
+    // Restart the quiz
+    cy.get('button').contains('Take New Quiz').click();
+
+    // Verify the quiz is restarted
+    cy.get('.card').should('be.visible');
+    cy.get('h2').should('not.be.empty');
   });
 });
