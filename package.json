@@ -16,7 +16,6 @@
     "render-build": "npm install && npm run build",
     "test": "cypress open",
     "test-component": "cypress run --component"
-    
   },
   "keywords": [],
   "author": "",
@@ -25,7 +24,7 @@
     "@cypress/react18": "^2.0.1",
     "@testing-library/cypress": "^10.0.3",
     "@types/react": "^18.3.3",
-    "@vitejs/plugin-react": "^4.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
     "concurrently": "^8.2.2",
     "cypress": "^13.17.0",
     "install": "^0.13.0",
